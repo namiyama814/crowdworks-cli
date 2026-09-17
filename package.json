@@ -5,8 +5,8 @@
   "license": "MIT",
   "type": "module",
   "bin": {
-    "cw": "./dist/cli.js",
-    "cw-mcp": "./dist/mcp.js"
+    "cw": "dist/cli.js",
+    "cw-mcp": "dist/mcp.js"
   },
   "files": [
     "dist",
