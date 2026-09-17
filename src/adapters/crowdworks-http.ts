@@ -29,6 +29,7 @@ function tableValue($: cheerio.CheerioAPI, selector: string, label: string): str
 function parseDetail(html: string, url: string): Job {
   const $ = cheerio.load(html);
   const body = $('body').text().replace(/\s+/g, ' ').trim();
+  const description = $('#job_offer_detail .detail_information').last().text().replace(/\n[ \t]*/g, '\n').replace(/\n{3,}/g, '\n\n').trim();
   const title = $('h1').first().text().trim();
   if (!title) throw new Error('案件タイトルを取得できませんでした。サイトの表示変更の可能性があります。');
   const id = new URL(url).pathname.match(/\/jobs\/(\d+)/)?.[1] ?? url;
@@ -36,7 +37,7 @@ function parseDetail(html: string, url: string): Job {
   const amounts = (budget.replace(/,/g, '').match(/\d+/g) ?? []).map(Number);
   const rating = numberFrom($('.client_rating .star_container').first().text());
   return {
-    id, url, title, description: body.trim(), budgetMin: amounts[0], budgetMax: amounts[1] ?? amounts[0],
+    id, url, title, description: description || body, budgetMin: amounts[0], budgetMax: amounts[1] ?? amounts[0],
     publishedAt: dateFrom(tableValue($, '.cw-table.summary tr', '掲載日')),
     deadline: dateFrom(tableValue($, '.cw-table.summary tr', '応募期限')),
     client: { name: $('.client_name').first().text().trim() || '不明なクライアント', rating, verified: $('.identity_verified').length > 0, jobsPosted: numberFrom(tableValue($, '.client_detail_table tr', '募集実績')) },

@@ -35,7 +35,7 @@ server.registerTool('run_saved_search', {
   const jobs = await useSource((source) => source.search(criteria));
   return text(sortJobs(jobs, sort as SortField).map(jobSummary));
 });
-server.registerTool('get_job', { description: '案件詳細と応募状況を取得する', inputSchema: { url: z.string().url() } }, async ({ url }) => text(formatJobDetail(await useSource((source) => source.getJob(url)))));
+server.registerTool('get_job', { description: '案件詳細と応募状況を取得する', inputSchema: { url: z.string().url(), include_description: z.boolean().optional() } }, async ({ url, include_description = false }) => text(formatJobDetail(await useSource((source) => source.getJob(url)), include_description)));
 server.registerTool('create_proposal', {
   description: '案件用の提案文下書きを生成する。応募送信は行わない。', inputSchema: { url: z.string().url(), template: z.string().default('default') }
 }, async ({ url, template }) => {

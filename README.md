@@ -19,6 +19,9 @@ cw saved-search add typescript "TypeScript" --min-budget 50000 --verified --min-
 cw saved-search run typescript --sort competition
 cw job show https://crowdworks.jp/public/jobs/123456
 
+# 完成尺・作業内容・報酬条件を含む本文も確認する
+cw job show https://crowdworks.jp/public/jobs/123456 --detail
+
 # 提案文を作る
 cw proposal create https://crowdworks.jp/public/jobs/123456
 

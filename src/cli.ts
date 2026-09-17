@@ -64,9 +64,9 @@ saved.command('run <name>').option('--sort <field>', undefined, 'published').act
 });
 
 const jobCommand = program.command('job').description('案件を表示する');
-jobCommand.command('show <url>').description('案件詳細と応募状況を表示する').action(async (url: string) => {
+jobCommand.command('show <url>').description('案件詳細と応募状況を表示する').option('--detail', '仕事の詳細本文も表示する').action(async (url: string, options: { detail?: boolean }) => {
   const job = await withSource((client) => client.getJob(url));
-  console.log(formatJobDetail(job));
+  console.log(formatJobDetail(job, options.detail));
 });
 
 const proposal = program.command('proposal').description('提案文を作成する');
