@@ -45,6 +45,45 @@ codex mcp add crowdworks -- cw-mcp
 
 応募・ログイン機能は提供しません。作成した提案文を確認し、応募はクラウドワークスの通常画面から行ってください。
 
+## Cloudflare Workers MCP
+
+リポジトリの `workers/` に、リモート向け MCP サーバーを同梱しています。ローカル MCP とは異なり、公開案件の検索・詳細のみを提供します（`search_jobs` / `get_job`）。保存検索・提案文生成は含みません。
+
+```sh
+cd workers
+npm install
+cp .dev.vars.example .dev.vars   # MCP_AUTH_TOKEN を設定
+npx wrangler dev                 # またはルートから npm run workers:dev
+```
+
+本番デプロイ:
+
+```sh
+cd workers
+npx wrangler secret put MCP_AUTH_TOKEN
+npx wrangler deploy              # またはルートから npm run workers:deploy
+```
+
+エンドポイントは `https://<worker>.workers.dev/mcp` です。リクエストには `Authorization: Bearer <MCP_AUTH_TOKEN>` が必要です。
+
+MCP Inspector や `mcp-remote` から接続する例:
+
+```json
+{
+  "mcpServers": {
+    "crowdworks": {
+      "command": "npx",
+      "args": [
+        "mcp-remote",
+        "https://crowdworks-mcp.<your-account>.workers.dev/mcp",
+        "--header",
+        "Authorization: Bearer ${MCP_AUTH_TOKEN}"
+      ]
+    }
+  }
+}
+```
+
 ## 開発
 
 Node.js 24 LTS と Docker を使います。

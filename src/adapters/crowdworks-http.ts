@@ -1,14 +1,21 @@
-import axios from 'axios';
 import * as cheerio from 'cheerio';
 import { matchesSavedSearch } from '../domain/jobs.js';
 import type { Job, JobSource, SavedSearch } from '../domain/types.js';
 
 const BASE_URL = 'https://crowdworks.jp';
-const http = axios.create({
-  baseURL: BASE_URL,
-  headers: { 'User-Agent': 'crowdworks-cli/0.1 (+https://github.com/namiyama/crowdworks-cli)' },
-  timeout: 20_000
-});
+const USER_AGENT = 'crowdworks-cli/0.1 (+https://github.com/namiyama/crowdworks-cli)';
+const REQUEST_TIMEOUT_MS = 20_000;
+
+async function fetchText(url: string): Promise<string> {
+  const response = await fetch(url, {
+    headers: { 'User-Agent': USER_AGENT },
+    signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS)
+  });
+  if (!response.ok) {
+    throw new Error(`HTTP ${response.status} ${response.statusText}: ${url}`);
+  }
+  return response.text();
+}
 
 function numberFrom(value?: string): number | undefined {
   const match = value?.replace(/,/g, '').match(/\d+(?:\.\d+)?/);
@@ -60,15 +67,15 @@ function parseSearchResults(html: string): Job[] {
 
 export class CrowdWorksHttpSource implements JobSource {
   async search(criteria: SavedSearch): Promise<Job[]> {
-    const response = await http.get('/public/jobs');
-    const candidates = parseSearchResults(response.data);
+    const html = await fetchText(`${BASE_URL}/public/jobs`);
+    const candidates = parseSearchResults(html);
     const matching = candidates.filter((job) => matchesSavedSearch(job, criteria));
     const details = await Promise.all(matching.map((job) => this.getJob(job.url)));
     return details;
   }
 
   async getJob(url: string): Promise<Job> {
-    const response = await http.get(url);
-    return parseDetail(response.data, url);
+    const html = await fetchText(url);
+    return parseDetail(html, url);
   }
 }
